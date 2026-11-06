@@ -128,8 +128,9 @@
     </footer>
   </div>
 
-  <!-- QR generation (UMD). Falls back to a plain link if the CDN is unreachable. -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <!-- The QR is a static, self-contained SVG served alongside this page
+       (generated for https://invoice.gakaki.com/). No CDN dependency, so it
+       renders offline and on networks where public CDNs are blocked. -->
   <script>
     // ---- Configuration (filled in at deploy time) ----
     const GITHUB_REPO = "gakaki/invoice-manager";
@@ -149,18 +150,15 @@
       document.getElementById('repo-link').style.display = 'none';
     }
 
-    // ---- QR code of this page ----
+    // ---- QR code of this page (static SVG, no external script) ----
     function renderQR() {
       const el = document.getElementById('qrcode');
-      if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
-        const canvas = document.createElement('canvas');
-        el.appendChild(canvas);
-        window.QRCode.toCanvas(canvas, pageUrl, { width: 180, margin: 1 }, (err) => {
-          if (err) { el.innerHTML = '<div class="qrcap">二维码生成失败</div>'; }
-        });
-      } else {
-        el.innerHTML = '<div class="qrcap">二维码组件未加载，请直接复制链接。</div>';
-      }
+      const img = document.createElement('img');
+      img.src = 'qrcode.svg';
+      img.alt = '扫码打开发票管理下载页';
+      img.width = 180;
+      img.height = 180;
+      el.appendChild(img);
     }
     renderQR();
 
