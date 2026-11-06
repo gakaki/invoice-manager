@@ -2,6 +2,20 @@
 
 兼容 macOS 桌面与 Android 手机的发票管理应用：输入文字、选择或拍摄发票图片做 OCR，按指定格式拼接文字，支持多选发票批量输出。数据持久化在 Cloudflare D1，OCR 由 Cloudflare Workers AI 完成。
 
+![发票管理操作演示](assets/demo.webp)
+
+> 8.8 秒循环演示：发票列表 → 粘贴文字自动解析字段 → 多选拼接输出 → 设置后端地址（中文字幕，动画 WebP）。
+
+**当前版本真实界面截图**（macOS 窗口实拍，WebP）：
+
+| 发票列表 · 增删改查 | 录入 · 文字解析 / 图片 OCR |
+|---|---|
+| ![发票列表](assets/screenshots/01-list.webp) | ![录入发票](assets/screenshots/02-add.webp) |
+
+| 多选 · 按格式拼接输出 | 设置 · 后端地址与 D1 |
+|---|---|
+| ![拼接输出](assets/screenshots/03-output.webp) | ![设置](assets/screenshots/04-settings.webp) |
+
 ## 下载
 
 打开下载页：**<https://invoice.gakaki.com>** —— 列出各平台安装包、可点击链接与扫码二维码；也可直接前往 [GitHub Releases](https://github.com/gakaki/invoice-manager/releases)。
@@ -43,6 +57,8 @@ npx wrangler dev             # 本地调试（--local D1）
 ```
 
 也可直接 `cargo run`（macOS/Windows/Linux 桌面后端）、`nsh run`（热重载）。
+
+**截图与演示动图可复现**：`app/Screenshots.test.tsx` 在真实 macOS 窗口渲染四个界面（headless 下自动跳过，CI 不报错），输出 `assets/screenshots/*.png`；转成 WebP（`cwebp -q 82`）并删除原 PNG，再用 ffmpeg 给每帧加中文字幕、`img2webp -loop 0 -d 2200 -lossy -q 78` 合成 `assets/demo.webp`。UI 变化后重跑一次即可同步更新。
 
 ## 部署
 

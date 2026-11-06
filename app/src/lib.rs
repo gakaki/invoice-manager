@@ -846,6 +846,7 @@ fn invoice_row(inv: Invoice, st: State) -> AnyElement {
                 .justify_center()
                 .border_1()
                 .border_color(move || theme().border)
+                .test_id(&format!("select-{number}"))
                 .bg({
                     let id = id.clone();
                     move || {

@@ -20,3 +20,6 @@ release/
 *.dmg
 *.apk
 *.ipa
+
+# Screenshot capture writes PNGs; only the WebP versions are committed.
+assets/screenshots/*.png
