@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "invoice-manager",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Static download page (site/) served by the Worker for all non-/api routes.
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application"
+  },
+
+  // Cloudflare D1 — fill in database_id after `wrangler d1 create invoice-db`.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "invoice-db",
+      "database_id": "fb0d70d6-c6bd-4fe1-8c2c-f01c642d7854",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // Workers AI binding for invoice OCR (vision model).
+  "ai": {
+    "binding": "AI"
+  },
+
+  // Production entry: custom domain under gakaki.com (never *.workers.dev).
+  "routes": [
+    { "pattern": "invoice.gakaki.com", "custom_domain": true }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}

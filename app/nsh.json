@@ -1,0 +1,8 @@
+{
+  "name": "发票管理",
+  "id": "com.gakaki.invoicemanager",
+  "version": "1.0.0",
+  "build": 1,
+  "rust": ".",
+  "root": "App"
+}

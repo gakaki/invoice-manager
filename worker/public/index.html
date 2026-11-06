@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>发票管理 · 下载</title>
+  <meta name="description" content="发票管理 — 兼容 macOS 与 Android 的发票管理应用。输入文字或选择/拍摄图片，OCR 识别后按指定格式拼接输出，支持多选发票批量输出。数据保存在 Cloudflare D1。" />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #171a21;
+      --border: #262b36;
+      --fg: #e7eaf0;
+      --muted: #9aa3b2;
+      --primary: #4f8cff;
+      --primary-fg: #ffffff;
+      --accent: #34d399;
+      --radius: 14px;
+      color-scheme: dark;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7f9; --card: #ffffff; --border: #e3e6ec; --fg: #16181d;
+        --muted: #5b6472; --primary: #2f6fed; --primary-fg: #fff; --accent: #0f9d6a;
+        color-scheme: light;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+      line-height: 1.6; -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 880px; margin: 0 auto; padding: 40px 20px 64px; }
+    header { text-align: center; margin-bottom: 32px; }
+    .logo {
+      width: 72px; height: 72px; border-radius: 18px; margin: 0 auto 16px;
+      background: var(--primary); display: flex; align-items: center; justify-content: center;
+      font-size: 36px; color: var(--primary-fg);
+    }
+    h1 { font-size: 30px; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .tagline { color: var(--muted); font-size: 16px; margin: 0 auto; max-width: 560px; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 24px; margin-bottom: 20px;
+    }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 720px) { .grid { grid-template-columns: 1.4fr 1fr; align-items: start; } }
+    h2 { font-size: 17px; margin: 0 0 16px; }
+    .dl { display: flex; flex-direction: column; gap: 12px; }
+    .btn {
+      display: flex; align-items: center; gap: 14px; text-decoration: none;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; color: var(--fg); transition: border-color .15s, transform .05s;
+    }
+    .btn:hover { border-color: var(--primary); }
+    .btn:active { transform: scale(.99); }
+    .btn .ico { font-size: 26px; width: 34px; text-align: center; }
+    .btn .meta { flex: 1; min-width: 0; }
+    .btn .name { font-weight: 600; font-size: 15px; }
+    .btn .sub { color: var(--muted); font-size: 12.5px; word-break: break-all; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+    .btn.primary .sub { color: rgba(255,255,255,.8); }
+    .qrbox { text-align: center; }
+    #qrcode { display: inline-block; padding: 12px; background: #fff; border-radius: 12px; }
+    #qrcode canvas, #qrcode img { display: block; }
+    .qrcap { color: var(--muted); font-size: 13px; margin-top: 12px; }
+    .urlrow { margin-top: 12px; font-size: 12.5px; color: var(--muted); word-break: break-all; }
+    .urlrow a { color: var(--primary); }
+    ul.feat { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14.5px; }
+    ul.feat li { margin-bottom: 6px; }
+    .badge { display: inline-block; font-size: 12px; color: var(--accent); border: 1px solid var(--border); border-radius: 999px; padding: 2px 10px; margin-bottom: 12px; }
+    .shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .shots figure { margin: 0; }
+    .shots img { width: 100%; border-radius: 10px; border: 1px solid var(--border); display: block; }
+    .shots figcaption { color: var(--muted); font-size: 12px; margin-top: 6px; text-align: center; }
+    footer { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 28px; }
+    footer a { color: var(--primary); text-decoration: none; }
+    .note { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+    .status { font-size: 13px; color: var(--muted); min-height: 20px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">票</div>
+      <h1>发票管理</h1>
+      <p class="tagline">兼容 macOS 桌面与 Android 手机。输入文字，或选择 / 拍摄发票图片，OCR 识别后按指定格式拼接输出；支持多选发票批量输出。数据保存在 Cloudflare D1。</p>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <span class="badge" id="version">最新版本</span>
+        <h2>下载应用</h2>
+        <div class="dl" id="downloads">
+          <div class="status" id="status">正在从 GitHub Releases 获取最新版本…</div>
+        </div>
+        <p class="note">macOS 为未签名 .app（首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许）；Android 为 .apk（需在系统设置中允许安装未知来源应用）。</p>
+      </section>
+
+      <section class="card qrbox">
+        <h2>扫码打开下载页</h2>
+        <div id="qrcode"></div>
+        <div class="qrcap">用手机相机扫描二维码，在手机上打开本页并下载对应版本。</div>
+        <div class="urlrow">链接：<a id="pagelink" href="#">本页地址</a></div>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>功能</h2>
+      <ul class="feat">
+        <li>三种录入方式：直接输入 / 粘贴文字（启发式解析字段）、选择图片、Android 系统选择器自带相机拍摄。</li>
+        <li>云端 OCR：Cloudflare Worker 调用 Workers AI 视觉模型，自动抽取发票代码、号码、开票日期、购销双方及税号、金额、税额、价税合计。</li>
+        <li>发票管理：列表、新增、编辑、删除，数据持久化在 Cloudflare D1（已按行读取额度优化查询）。</li>
+        <li>多选拼接输出：勾选多张发票，按约定格式拼接为文本，一键复制到剪贴板。</li>
+        <li>技术栈：Rust + Native Shell（nsh.dev）原生跨平台 UI，blaze 增量编译；后端 Cloudflare Worker + D1 + Workers AI。</li>
+      </ul>
+    </section>
+
+    <section class="card" id="shots-card" style="display:none">
+      <h2>界面截图</h2>
+      <div class="shots" id="shots"></div>
+    </section>
+
+    <footer>
+      <p>由 Rust · Native Shell (nsh.dev) · blaze · Cloudflare D1 / Workers AI 构建。</p>
+      <p><a id="repo-link" href="#" target="_blank" rel="noopener">在 GitHub 上查看源码与全部版本</a></p>
+    </footer>
+  </div>
+
+  <!-- QR generation (UMD). Falls back to a plain link if the CDN is unreachable. -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+  <script>
+    // ---- Configuration (filled in at deploy time) ----
+    const GITHUB_REPO = "gakaki/invoice-manager";
+    const RELEASES_URL = GITHUB_REPO && !GITHUB_REPO.startsWith("__")
+      ? `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`
+      : null;
+    const REPO_PAGE = GITHUB_REPO && !GITHUB_REPO.startsWith("__")
+      ? `https://github.com/${GITHUB_REPO}`
+      : null;
+
+    const pageUrl = window.location.href.split('#')[0];
+    document.getElementById('pagelink').textContent = pageUrl;
+    document.getElementById('pagelink').href = pageUrl;
+    if (REPO_PAGE) {
+      document.getElementById('repo-link').href = REPO_PAGE;
+    } else {
+      document.getElementById('repo-link').style.display = 'none';
+    }
+
+    // ---- QR code of this page ----
+    function renderQR() {
+      const el = document.getElementById('qrcode');
+      if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
+        const canvas = document.createElement('canvas');
+        el.appendChild(canvas);
+        window.QRCode.toCanvas(canvas, pageUrl, { width: 180, margin: 1 }, (err) => {
+          if (err) { el.innerHTML = '<div class="qrcap">二维码生成失败</div>'; }
+        });
+      } else {
+        el.innerHTML = '<div class="qrcap">二维码组件未加载，请直接复制链接。</div>';
+      }
+    }
+    renderQR();
+
+    // ---- Platform metadata for asset matching ----
+    function classify(name) {
+      const n = name.toLowerCase();
+      if (n.endsWith('.apk')) return { platform: 'Android', icon: '🤖', order: 1 };
+      if (n.endsWith('.dmg')) return { platform: 'macOS', icon: '', order: 0 };
+      if (n.endsWith('.app') || n.endsWith('.zip') && n.includes('mac')) return { platform: 'macOS', icon: '', order: 0 };
+      if (n.endsWith('.ipa')) return { platform: 'iOS', icon: '', order: 2 };
+      if (n.endsWith('.exe') || n.endsWith('.msi')) return { platform: 'Windows', icon: '🪟', order: 3 };
+      return null;
+    }
+
+    function humanSize(bytes) {
+      if (!bytes && bytes !== 0) return '';
+      const mb = bytes / (1024 * 1024);
+      return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(0)} KB`;
+    }
+
+    async function loadRelease() {
+      const dl = document.getElementById('downloads');
+      const status = document.getElementById('status');
+      if (!RELEASES_URL) {
+        status.textContent = '尚未配置 GitHub 仓库，发布后此处会自动列出下载链接。';
+        return;
+      }
+      try {
+        const res = await fetch(RELEASES_URL, { headers: { 'Accept': 'application/vnd.github+json' } });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const rel = await res.json();
+        document.getElementById('version').textContent = `最新版本 ${rel.tag_name || rel.name || ''}`;
+        const assets = (rel.assets || []).map(a => ({ name: a.name, url: a.browser_download_url, size: a.size, c: classify(a.name) }))
+          .filter(a => a.c);
+        assets.sort((a, b) => a.c.order - b.c.order);
+        dl.innerHTML = '';
+        if (assets.length === 0) {
+          dl.innerHTML = `<a class="btn primary" href="${rel.html_url}" target="_blank" rel="noopener"><span class="ico">📦</span><span class="meta"><span class="name">前往 Release 页面下载</span><span class="sub">${rel.html_url}</span></span></a>`;
+          return;
+        }
+        for (const a of assets) {
+          const btn = document.createElement('a');
+          btn.className = 'btn' + (a.c.order === 1 ? ' primary' : '');
+          btn.href = a.url; btn.target = '_blank'; btn.rel = 'noopener'; btn.download = a.name;
+          btn.innerHTML = `<span class="ico">${a.c.icon}</span><span class="meta"><span class="name">${a.c.platform} · ${a.name}</span><span class="sub">${humanSize(a.size)}</span></span>`;
+          dl.appendChild(btn);
+        }
+        const more = document.createElement('a');
+        more.className = 'btn'; more.href = rel.html_url; more.target = '_blank'; more.rel = 'noopener';
+        more.innerHTML = `<span class="ico">🗂</span><span class="meta"><span class="name">全部文件与更新说明</span><span class="sub">${rel.html_url}</span></span>`;
+        dl.appendChild(more);
+      } catch (e) {
+        status.textContent = `获取最新版本失败（${e.message}）。请稍后重试或直接访问 GitHub 仓库。`;
+        if (REPO_PAGE) {
+          dl.innerHTML = `<a class="btn primary" href="${REPO_PAGE}/releases" target="_blank" rel="noopener"><span class="ico">📦</span><span class="meta"><span class="name">前往 GitHub Releases</span><span class="sub">${REPO_PAGE}/releases</span></span></a>`;
+        }
+      }
+    }
+    loadRelease();
+
+    // ---- Optional screenshots (assets/shots.json lists {src,caption}) ----
+    fetch('assets/shots.json').then(r => r.ok ? r.json() : null).then(list => {
+      if (!Array.isArray(list) || list.length === 0) return;
+      const card = document.getElementById('shots-card');
+      const box = document.getElementById('shots');
+      box.innerHTML = '';
+      for (const s of list) {
+        const fig = document.createElement('figure');
+        fig.innerHTML = `<img src="${s.src}" alt="${s.caption || ''}" loading="lazy"><figcaption>${s.caption || ''}</figcaption>`;
+        box.appendChild(fig);
+      }
+      card.style.display = '';
+    }).catch(() => {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "invoice-manager-worker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker + D1 backend for 发票管理 (invoice manager): REST CRUD, Workers AI OCR, static download page.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "d1:create": "wrangler d1 create invoice-db",
+    "d1:migrate:local": "wrangler d1 migrations apply invoice-db --local",
+    "d1:migrate:remote": "wrangler d1 migrations apply invoice-db --remote",
+    "types": "wrangler types",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20261106.1",
+    "typescript": "5.9.3",
+    "wrangler": "4.158.0"
+  }
+}

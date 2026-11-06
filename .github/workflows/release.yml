@@ -1,0 +1,67 @@
+name: Release
+
+# Build macOS / Android installers and attach them to the matching GitHub Release.
+# The artifacts come from this pipeline only; a failing test or build must not
+# publish stale files.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    # nsh ships a prebuilt macOS Apple-silicon distribution; macos-15 public
+    # runners are arm64, which matches the locally verified build environment.
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install nsh (pinned)
+        run: |
+          curl -fsSL https://nsh.dev/install.sh | NSH_VERSION=v0.4.0 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          nsh --version
+
+      - name: Rust targets for Android
+        run: rustup target add aarch64-linux-android armv7-linux-androideabi
+
+      - name: Tests (headless UI)
+        working-directory: app
+        run: nsh test
+
+      - name: Package macOS app
+        working-directory: app
+        run: nsh package --target macos
+
+      - name: Package Android APK
+        working-directory: app
+        run: nsh package --target android
+
+      - name: Assemble release assets
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          mkdir -p release
+          hdiutil create -volname "发票管理" \
+            -srcfolder "app/.nsh/out/发票管理.app" \
+            -ov -format UDZO "release/invoice-manager-${TAG}-macos.dmg"
+          cp "app/.nsh/out/发票管理.apk" "release/invoice-manager-${TAG}-android.apk"
+          cd release
+          shasum -a 256 "invoice-manager-${TAG}-macos.dmg" "invoice-manager-${TAG}-android.apk" > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*
+          generate_release_notes: true
+          body: |
+            发票管理 macOS / Android 安装包。
+
+            - macOS `.dmg` 为 ad hoc 签名、未公证：首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许。
+            - Android `.apk` 使用 debug keystore 签名：需允许安装未知来源应用。
+            - `SHA256SUMS` 为各产物的校验值。

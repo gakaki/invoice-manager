@@ -1,0 +1,22 @@
+# macOS
+.DS_Store
+
+# HiFox agent context / local caches (never commit)
+.agent_context/
+.wrangler/
+worker/.wrangler/
+
+# Rust / NSH build outputs (also ignored by app/.gitignore).
+# `app/target` may be a symlink to mbx's managed target cache — no trailing
+# slash so the pattern also matches the symlink itself.
+app/target
+app/target/
+app/.nsh/
+worker/node_modules/
+
+# Release artifacts: uploaded to GitHub Releases, not committed to git
+dist/
+release/
+*.dmg
+*.apk
+*.ipa
