@@ -43,8 +43,12 @@ jobs:
 
       - name: Assemble release assets
         env:
-          TAG: ${{ github.ref_name }}
+          REF: ${{ github.ref_name }}
         run: |
+          # Strip the leading "v" so assets match the published naming
+          # (invoice-manager-1.0.0-macos.dmg), replacing rather than duplicating
+          # assets when a tag both creates and rebuilds a Release.
+          TAG="${REF#v}"
           mkdir -p release
           hdiutil create -volname "发票管理" \
             -srcfolder "app/.nsh/out/发票管理.app" \
