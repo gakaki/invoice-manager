@@ -23,3 +23,6 @@ release/
 
 # Screenshot capture writes PNGs; only the WebP versions are committed.
 assets/screenshots/*.png
+
+# Generated NSH web build staged for deployment (never commit binaries).
+worker/web-public/

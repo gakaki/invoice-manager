@@ -1,6 +1,8 @@
 # 发票管理
 
-兼容 macOS 桌面与 Android 手机的发票管理应用：输入文字、选择或拍摄发票图片做 OCR，按指定格式拼接文字，支持多选发票批量输出。数据持久化在 Cloudflare D1，OCR 由 Cloudflare Workers AI 完成。
+兼容 macOS 桌面、Android 手机与**网页**的发票管理应用：输入文字、选择或拍摄发票图片做 OCR，按指定格式拼接文字，支持多选发票批量输出。数据持久化在 Cloudflare D1，OCR 由 Cloudflare Workers AI 完成。
+
+网页版（无需安装）：**<https://web.gakaki.com>** —— 同一个 Rust root 由 `nsh package --target web` 编译为 WASM 静态站点，部署在 Cloudflare Workers 静态资源上，与原生端共用同一套 D1 数据。
 
 ![发票管理操作演示](assets/demo.webp)
 
@@ -15,6 +17,10 @@
 | 多选 · 按格式拼接输出 | 设置 · 后端地址与 D1 |
 |---|---|
 | ![拼接输出](assets/screenshots/03-output.webp) | ![设置](assets/screenshots/04-settings.webp) |
+
+**网页版**（Chrome 实拍，与上面原生端同一份代码 / 同一份 D1 数据）：
+
+![网页版发票列表](assets/screenshots/05-web.webp)
 
 ## 下载
 
@@ -49,6 +55,7 @@ blaze check                  # 增量编译检查
 nsh test                     # headless UI 测试
 nsh package --target macos   # .nsh/out/发票管理.app
 nsh package --target android # .nsh/out/发票管理.apk
+nsh package --target web     # .nsh/out/发票管理/ 静态站点（需 llvm-ar 在 PATH）
 
 cd ../worker
 npm install
@@ -70,6 +77,15 @@ npx wrangler d1 migrations apply invoice-db --remote
 npx wrangler deploy
 npx wrangler deploy --dry-run   # 发布前校验绑定
 ```
+
+网页版部署在自定义域名 **<https://web.gakaki.com>**，是一个纯静态资源 Worker（配置 `worker/wrangler.web.jsonc`）。一条命令即可重建并发布：
+
+```sh
+./worker/deploy-web.sh
+# nsh package --target web → 只保留未压缩文件到 worker/web-public/ → wrangler deploy
+```
+
+脚本会把 Rust root 编译成 `nsh.<hash>.wasm` + 内容命名的 JS，并自动把 rustup 的 `llvm-ar`（`llvm-tools` 组件）加入 PATH —— wasm 构建时 cc-rs 需要它。`.gz` / `.br` 预压缩副本不上载，Cloudflare 会按 `Accept-Encoding` 实时压缩。
 
 推送 `v*` 版本标签会触发 `.github/workflows/release.yml`：运行 `nsh test`，构建 macOS `.dmg` 与 Android `.apk`，生成 SHA-256 校验文件并上传到同标签的 GitHub Release。下载页通过 GitHub Releases API 自动列出最新版本的安装包。
 

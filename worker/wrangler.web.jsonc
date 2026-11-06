@@ -1,0 +1,21 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Assets-only Worker for the NSH web build (nsh package --target web).
+  // No Worker script: Cloudflare serves the static site from ./web-public.
+  "name": "invoice-manager-web",
+  "compatibility_date": "2026-11-01",
+
+  "assets": {
+    "directory": "./web-public",
+    "not_found_handling": "single-page-application"
+  },
+
+  // Production entry: a custom domain under gakaki.com, never *.workers.dev.
+  "routes": [
+    { "pattern": "web.gakaki.com", "custom_domain": true }
+  ],
+
+  "observability": {
+    "enabled": true
+  }
+}
