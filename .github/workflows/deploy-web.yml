@@ -1,0 +1,44 @@
+name: Deploy Web
+
+# Rebuild and publish the NSH web (WASM) build whenever the app or the web
+# Worker config changes. The token in Secrets is scoped to one account and the
+# gakaki.com zone (Cloudflare "Edit Cloudflare Workers" template).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/**"
+      - "worker/wrangler.web.jsonc"
+      - "worker/deploy-web.sh"
+      - ".github/workflows/deploy-web.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install pinned nsh
+        run: |
+          curl -fsSL https://nsh.dev/install.sh | NSH_VERSION=v0.4.0 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          nsh --version
+
+      - name: Rust wasm target + llvm-tools
+        run: |
+          rustup target add wasm32-unknown-unknown
+          rustup component add llvm-tools
+
+      - name: Worker tooling (wrangler)
+        run: npm --prefix worker install --no-audit --no-fund
+
+      - name: Build and deploy web.gakaki.com
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          NSH: nsh
+        run: ./worker/deploy-web.sh

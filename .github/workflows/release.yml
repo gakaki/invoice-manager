@@ -1,8 +1,9 @@
 name: Release
 
 # Build macOS / Android installers and attach them to the matching GitHub Release.
-# The artifacts come from this pipeline only; a failing test or build must not
-# publish stale files.
+# Both platforms are signed with the free, local developer identities stored in
+# repo Secrets, so every release is signed with the same keys. A failing test or
+# build must not publish stale files.
 on:
   push:
     tags:
@@ -29,6 +30,28 @@ jobs:
       - name: Rust targets for Android
         run: rustup target add aarch64-linux-android armv7-linux-androideabi
 
+      - name: Set up macOS signing (free local developer certificate)
+        env:
+          CERT_B64: ${{ secrets.MACOS_SIGNING_CERT_BASE64 }}
+          CERT_PASS: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/invoice-signing.keychain-db"
+          echo "$CERT_B64" | base64 --decode > "$RUNNER_TEMP/signing.p12"
+          security create-keychain -p "$CERT_PASS" "$KC"
+          security unlock-keychain -p "$CERT_PASS" "$KC"
+          security set-keychain-settings -lut 3600 "$KC"
+          security import "$RUNNER_TEMP/signing.p12" -k "$KC" -P "$CERT_PASS" -T /usr/bin/codesign -A
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$CERT_PASS" "$KC" >/dev/null 2>&1 || true
+          # A self-signed cert needs user-domain trust before codesign will use it.
+          openssl pkcs12 -in "$RUNNER_TEMP/signing.p12" -clcerts -nokeys -passin "pass:$CERT_PASS" -out "$RUNNER_TEMP/signing.pem"
+          security add-trusted-cert -r trustRoot -k "$KC" "$RUNNER_TEMP/signing.pem"
+          security find-identity -v -p codesigning "$KC"
+
+      - name: Decode Android release keystore
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: echo "$KS_B64" | base64 --decode > "$RUNNER_TEMP/invoice-manager-release.jks"
+
       - name: Tests (headless UI)
         working-directory: app
         run: nsh test
@@ -37,9 +60,25 @@ jobs:
         working-directory: app
         run: nsh package --target macos
 
-      - name: Package Android APK
+      - name: Sign macOS app with local developer identity
+        env:
+          CERT_PASS: ${{ secrets.MACOS_SIGNING_CERT_PASSWORD }}
+        run: |
+          KC="$RUNNER_TEMP/invoice-signing.keychain-db"
+          codesign --keychain "$KC" --force --deep --timestamp=none \
+            --sign "Invoice Manager Local Developer" "app/.nsh/out/发票管理.app"
+          codesign --verify --deep --strict --verbose=2 "app/.nsh/out/发票管理.app"
+
+      - name: Package Android APK (release-signed)
         working-directory: app
-        run: nsh package --target android
+        env:
+          KS_PASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          nsh package --target android \
+            --keystore "$RUNNER_TEMP/invoice-manager-release.jks" \
+            --key-alias "$KS_ALIAS" \
+            --keystore-password "$KS_PASS"
 
       - name: Assemble release assets
         env:
@@ -66,6 +105,7 @@ jobs:
           body: |
             发票管理 macOS / Android 安装包。
 
-            - macOS `.dmg` 为 ad hoc 签名、未公证：首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许。
-            - Android `.apk` 使用 debug keystore 签名：需允许安装未知来源应用。
+            - macOS `.dmg` 使用免费本地开发者证书签名（无需付费 Apple Developer Program），未公证：其他 Mac 首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许。
+            - Android `.apk` 使用项目 release keystore 签名（非 debug key）：需允许安装未知来源应用。
+            - 两个签名密钥都保存在仓库 Secrets，后续版本用同一密钥，升级不会因签名不一致而失败。
             - `SHA256SUMS` 为各产物的校验值。

@@ -26,8 +26,9 @@
 
 打开下载页：**<https://invoice.gakaki.com>** —— 列出各平台安装包、可点击链接与扫码二维码；也可直接前往 [GitHub Releases](https://github.com/gakaki/invoice-manager/releases)。
 
-- **macOS** `.dmg`：ad hoc 签名、未公证。首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许。
-- **Android** `.apk`：使用 debug keystore 签名，需在系统设置中允许安装未知来源应用。
+- **macOS** `.dmg`：用**免费本地开发者证书**签名（不需要付费 Apple Developer Program），未经 Apple 公证。在其他 Mac 上首次打开请右键 → 打开，或在「系统设置 → 隐私与安全性」中允许。
+- **Android** `.apk`：用项目 **release keystore** 签名（不是共享的 debug key），需在系统设置中允许安装未知来源应用。
+- 两个签名密钥都保存在仓库 GitHub Actions Secrets 中，`v*` 标签流水线用同一密钥重签，升级不会因签名不一致而失败。
 
 ## 功能
 
@@ -86,6 +87,8 @@ npx wrangler deploy --dry-run   # 发布前校验绑定
 ```
 
 脚本会把 Rust root 编译成 `nsh.<hash>.wasm` + 内容命名的 JS，并自动把 rustup 的 `llvm-ar`（`llvm-tools` 组件）加入 PATH —— wasm 构建时 cc-rs 需要它。`.gz` / `.br` 预压缩副本不上载，Cloudflare 会按 `Accept-Encoding` 实时压缩。
+
+改动 `app/` 或 web Worker 配置并推到 `main` 会触发 `.github/workflows/deploy-web.yml` 自动重建发布；也可在 Actions 页手动 `workflow_dispatch`。流水线用仓库 Secrets 里的 `CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID`（限定到该账户与 `gakaki.com` zone）。Release 流水线另有 `ANDROID_KEYSTORE_*` 与 `MACOS_SIGNING_CERT_*` 四个签名 Secrets。
 
 推送 `v*` 版本标签会触发 `.github/workflows/release.yml`：运行 `nsh test`，构建 macOS `.dmg` 与 Android `.apk`，生成 SHA-256 校验文件并上传到同标签的 GitHub Release。下载页通过 GitHub Releases API 自动列出最新版本的安装包。
 
